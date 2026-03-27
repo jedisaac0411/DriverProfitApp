@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -9,8 +10,9 @@ import {
   View,
 } from 'react-native';
 import { saveExpenseEntry } from '../../utils/storage';
+import { getCustomExpenseCategories } from '../../utils/appSettings';
 
-const categories = [
+const defaultCategories = [
   'Gas',
   'Parking',
   'Tolls',
@@ -22,9 +24,26 @@ const categories = [
 ];
 
 export default function ExpensesScreen() {
+  const [categories, setCategories] = useState<string[]>(defaultCategories);
   const [selectedCategory, setSelectedCategory] = useState('Gas');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+
+  const loadCategories = async () => {
+    const customCategories = await getCustomExpenseCategories();
+    const merged = [...defaultCategories, ...customCategories];
+    setCategories(merged);
+
+    if (!merged.includes(selectedCategory)) {
+      setSelectedCategory(merged[0] || 'Gas');
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadCategories();
+    }, [selectedCategory])
+  );
 
   const handleSave = async () => {
     const entry = {
@@ -83,7 +102,7 @@ export default function ExpensesScreen() {
 
         <TextInput
           style={[styles.input, styles.noteInput]}
-          placeholder="Optional note (oil change, tire repair, etc.)"
+          placeholder="Optional note"
           placeholderTextColor="#888"
           value={note}
           onChangeText={setNote}

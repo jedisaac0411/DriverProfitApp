@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -9,8 +10,9 @@ import {
   View,
 } from 'react-native';
 import { saveEarningsEntry } from '../../utils/storage';
+import { getCustomPlatforms, getDistanceUnit } from '../../utils/appSettings';
 
-const platforms = [
+const defaultPlatforms = [
   'Uber',
   'Uber Eats',
   'Lyft',
@@ -18,11 +20,13 @@ const platforms = [
   'Amazon Flex',
   'Instacart',
   'Grab',
-  'GrabFood',
-  'Foodpanda',
+  'GrabFood'
 ];
 
 export default function EarningsScreen() {
+  const [platforms, setPlatforms] = useState<string[]>(defaultPlatforms);
+  const [distanceUnit, setDistanceUnit] = useState<'mi' | 'km'>('mi');
+
   const [selectedPlatform, setSelectedPlatform] = useState('Uber');
   const [earnings, setEarnings] = useState('');
   const [tips, setTips] = useState('');
@@ -30,6 +34,27 @@ export default function EarningsScreen() {
   const [hours, setHours] = useState('');
   const [distance, setDistance] = useState('');
   const [trips, setTrips] = useState('');
+
+  const loadSettings = async () => {
+    const [customPlatforms, unit] = await Promise.all([
+      getCustomPlatforms(),
+      getDistanceUnit(),
+    ]);
+
+    const mergedPlatforms = [...defaultPlatforms, ...customPlatforms];
+    setPlatforms(mergedPlatforms);
+    setDistanceUnit(unit);
+
+    if (!mergedPlatforms.includes(selectedPlatform)) {
+      setSelectedPlatform(mergedPlatforms[0] || 'Uber');
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSettings();
+    }, [selectedPlatform])
+  );
 
   const handleSave = async () => {
     const entry = {
@@ -62,27 +87,27 @@ export default function EarningsScreen() {
       <Text style={styles.subtitle}>Log your shift income by platform</Text>
 
       <Text style={styles.sectionTitle}>Platform</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsRow}>
+      <View style={styles.platformGrid}>
         {platforms.map((platform) => (
           <TouchableOpacity
             key={platform}
             style={[
-              styles.chip,
-              selectedPlatform === platform && styles.activeChip,
+              styles.platformCard,
+              selectedPlatform === platform && styles.activePlatformCard,
             ]}
             onPress={() => setSelectedPlatform(platform)}
           >
             <Text
               style={[
-                styles.chipText,
-                selectedPlatform === platform && styles.activeChipText,
+                styles.platformCardText,
+                selectedPlatform === platform && styles.activePlatformCardText,
               ]}
             >
               {platform}
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
 
       <View style={styles.card}>
         <TextInput
@@ -119,7 +144,7 @@ export default function EarningsScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Distance (mi or km)"
+          placeholder={`Distance (${distanceUnit})`}
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={distance}
@@ -165,24 +190,33 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 10,
   },
-  chipsRow: {
+  platformGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
-  chip: {
+  platformCard: {
+    width: '48%',
     backgroundColor: '#1E1E1E',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    marginRight: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 54,
   },
-  activeChip: {
+  activePlatformCard: {
     backgroundColor: '#4CAF50',
   },
-  chipText: {
+  platformCardText: {
     color: '#D1D5DB',
     fontWeight: '600',
+    fontSize: 14,
+    textAlign: 'center',
   },
-  activeChipText: {
+  activePlatformCardText: {
     color: '#FFFFFF',
   },
   card: {
