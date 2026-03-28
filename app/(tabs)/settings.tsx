@@ -19,10 +19,19 @@ import {
   removeCustomExpenseCategory,
   removeCustomPlatform,
   saveDistanceUnit,
+  getCurrency,
+  saveCurrency,
 } from '../../utils/appSettings';
+import {
+  backupAppData,
+  clearAllAppData,
+  restoreAppData,
+} from '../../utils/backupRestore';
+import { currencyOptions, getCurrencyLabel } from '../../utils/currency';
 
 export default function SettingsScreen() {
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>('mi');
+  const [currencyCode, setCurrencyCode] = useState('USD');
 
   const [customPlatforms, setCustomPlatforms] = useState<string[]>([]);
   const [customCategories, setCustomCategories] = useState<string[]>([]);
@@ -31,15 +40,17 @@ export default function SettingsScreen() {
   const [newCategory, setNewCategory] = useState('');
 
   const loadSettings = async () => {
-    const [unit, platforms, categories] = await Promise.all([
+    const [unit, platforms, categories, curr] = await Promise.all([
       getDistanceUnit(),
       getCustomPlatforms(),
       getCustomExpenseCategories(),
+      getCurrency(),
     ]);
 
     setDistanceUnit(unit);
     setCustomPlatforms(platforms);
     setCustomCategories(categories);
+    setCurrencyCode(curr);
   };
 
   useFocusEffect(
@@ -76,10 +87,120 @@ export default function SettingsScreen() {
     Alert.alert('Saved', `Distance unit set to ${unit}.`);
   };
 
+  const handleCurrencyChange = async (code: string) => {
+    setCurrencyCode(code);
+    await saveCurrency(code);
+    Alert.alert('Saved', `Currency set to ${getCurrencyLabel(code)}.`);
+  };
+
+  const handleBackup = async () => {
+    const result = await backupAppData();
+    if (!result.success) {
+      Alert.alert('Backup Failed', result.message || 'Unable to back up data.');
+    }
+  };
+
+  const handleRestore = async () => {
+    Alert.alert(
+      'Restore Backup',
+      'Restoring will overwrite current saved app data. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Restore',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await restoreAppData();
+
+            if (result.success) {
+              await loadSettings();
+              Alert.alert('Success', result.message || 'Backup restored.');
+            } else if (result.message !== 'Restore canceled.') {
+              Alert.alert(
+                'Restore Failed',
+                result.message || 'Unable to restore backup.'
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleClearData = async () => {
+    Alert.alert(
+      'Clear All Data',
+      'This will delete all earnings, expenses, settings, and custom entries. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await clearAllAppData();
+
+            if (result.success) {
+              await loadSettings();
+              setDistanceUnit('mi');
+              setCurrencyCode('USD');
+              setNewPlatform('');
+              setNewCategory('');
+              Alert.alert('Deleted', result.message);
+            } else {
+              Alert.alert('Error', result.message || 'Unable to clear data.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Settings</Text>
       <Text style={styles.subtitle}>Customize your app experience</Text>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Backup & Restore</Text>
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleBackup}>
+          <Text style={styles.actionButtonText}>Backup Data</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleRestore}>
+          <Text style={styles.actionButtonText}>Restore Data</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionButton, styles.deleteButton]}
+          onPress={handleClearData}
+        >
+          <Text style={styles.actionButtonText}>Clear All Data</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Currency</Text>
+        {currencyOptions.map((currency) => (
+          <TouchableOpacity
+            key={currency.code}
+            style={[
+              styles.listOption,
+              currencyCode === currency.code && styles.activeListOption,
+            ]}
+            onPress={() => handleCurrencyChange(currency.code)}
+          >
+            <Text
+              style={[
+                styles.listOptionText,
+                currencyCode === currency.code && styles.activeListOptionText,
+              ]}
+            >
+              {currency.code} ({currency.symbol}) — {currency.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Distance Unit</Text>
@@ -234,6 +355,24 @@ const styles = StyleSheet.create({
   activeOptionButtonText: {
     color: '#FFFFFF',
   },
+  listOption: {
+    backgroundColor: '#2A2A2A',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    marginBottom: 8,
+  },
+  activeListOption: {
+    backgroundColor: '#4CAF50',
+  },
+  listOptionText: {
+    color: '#D1D5DB',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  activeListOptionText: {
+    color: '#FFFFFF',
+  },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -257,6 +396,22 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  actionButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#EF4444',
+    marginBottom: 0,
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '700',
   },
   emptyText: {

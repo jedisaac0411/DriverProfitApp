@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const CUSTOM_PLATFORMS_KEY = 'custom_platforms';
 const CUSTOM_EXPENSE_CATEGORIES_KEY = 'custom_expense_categories';
 const DISTANCE_UNIT_KEY = 'distance_unit';
+const CURRENCY_KEY = 'currency_code';
 
 export type DistanceUnit = 'mi' | 'km';
 
@@ -85,4 +86,17 @@ export async function getDistanceUnit(): Promise<DistanceUnit> {
 
 export async function saveDistanceUnit(unit: DistanceUnit): Promise<void> {
   await AsyncStorage.setItem(DISTANCE_UNIT_KEY, unit);
+}
+
+export async function getCurrency(): Promise<string> {
+  try {
+    const value = await AsyncStorage.getItem(CURRENCY_KEY);
+    return value || 'USD';
+  } catch {
+    return 'USD';
+  }
+}
+
+export async function saveCurrency(currencyCode: string): Promise<void> {
+  await AsyncStorage.setItem(CURRENCY_KEY, currencyCode);
 }
