@@ -1,52 +1,42 @@
 {
   "expo": {
-    "name": "DriverProfitApp",
-    "slug": "DriverProfitApp",
+    "name": "GigProfit",
+    "slug": "gigprofit",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "driverprofitapp",
+    "icon": "./assets/icon.png",
+    "scheme": "gigprofit",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.DriverProfitApp"
     },
+
     "android": {
+      "package": "com.anonymous.DriverProfitApp",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.DriverProfitApp"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0B0F1A"
+      }
     },
+
     "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/favicon.png"
     },
+
     "plugins": [
-      "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#0B0F1A"
         }
       ]
     ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
+
     "extra": {
-      "router": {},
       "eas": {
         "projectId": "f8a1a4ad-b859-4aae-aa8f-c2f0a8b0bfaa"
       }
