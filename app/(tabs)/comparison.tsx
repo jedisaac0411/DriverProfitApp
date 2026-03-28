@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 import { getEarningsEntries } from '../../utils/storage';
+import { getCurrency } from '../../utils/appSettings';
+import { getCurrencySymbol } from '../../utils/currency';
 
 type RangeType = 'week' | 'month' | 'year';
 
@@ -33,9 +35,15 @@ export default function ComparisonScreen() {
   const [selectedRange, setSelectedRange] = useState<RangeType>('week');
   const [platformStats, setPlatformStats] = useState<PlatformStats[]>([]);
   const [topPlatform, setTopPlatform] = useState<PlatformStats | null>(null);
+  const [currencySymbol, setCurrencySymbol] = useState('$');
 
   const loadData = async () => {
-    const entries = (await getEarningsEntries()) as EarningsEntry[];
+    const [entries, currencyCode] = await Promise.all([
+      getEarningsEntries() as Promise<EarningsEntry[]>,
+      getCurrency(),
+    ]);
+
+    setCurrencySymbol(getCurrencySymbol(currencyCode));
     const now = new Date();
 
     const isThisWeek = (dateString: string) => {
@@ -87,8 +95,7 @@ export default function ComparisonScreen() {
 
     const platformArray = Object.values(platformMap).map((item) => ({
       ...item,
-      earningsPerHour:
-        item.hours > 0 ? item.earnings / item.hours : 0,
+      earningsPerHour: item.hours > 0 ? item.earnings / item.hours : 0,
     }));
 
     platformArray.sort((a, b) => b.earningsPerHour - a.earningsPerHour);
@@ -141,7 +148,7 @@ export default function ComparisonScreen() {
           <Text style={styles.topLabel}>Top Platform</Text>
           <Text style={styles.topPlatformName}>{topPlatform.platform}</Text>
           <Text style={styles.topPlatformValue}>
-            ${topPlatform.earningsPerHour.toFixed(2)}/hr
+            {currencySymbol}{topPlatform.earningsPerHour.toFixed(2)}/hr
           </Text>
         </View>
       )}
@@ -161,15 +168,13 @@ export default function ComparisonScreen() {
             <View style={styles.row}>
               <Text style={styles.label}>Earnings</Text>
               <Text style={styles.value}>
-                ${item.earnings.toFixed(2)}
+                {currencySymbol}{item.earnings.toFixed(2)}
               </Text>
             </View>
 
             <View style={styles.row}>
               <Text style={styles.label}>Hours</Text>
-              <Text style={styles.value}>
-                {item.hours.toFixed(2)}
-              </Text>
+              <Text style={styles.value}>{item.hours.toFixed(2)}</Text>
             </View>
 
             <View style={styles.row}>
@@ -180,7 +185,7 @@ export default function ComparisonScreen() {
             <View style={styles.row}>
               <Text style={styles.label}>Earnings / Hour</Text>
               <Text style={styles.value}>
-                ${item.earningsPerHour.toFixed(2)}
+                {currencySymbol}{item.earningsPerHour.toFixed(2)}
               </Text>
             </View>
           </View>

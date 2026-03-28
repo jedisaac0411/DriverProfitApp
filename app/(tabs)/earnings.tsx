@@ -10,7 +10,8 @@ import {
   View,
 } from 'react-native';
 import { saveEarningsEntry } from '../../utils/storage';
-import { getCustomPlatforms, getDistanceUnit } from '../../utils/appSettings';
+import { getCustomPlatforms, getDistanceUnit, getCurrency } from '../../utils/appSettings';
+import { getCurrencySymbol } from '../../utils/currency';
 
 const defaultPlatforms = [
   'Uber',
@@ -20,12 +21,13 @@ const defaultPlatforms = [
   'Amazon Flex',
   'Instacart',
   'Grab',
-  'GrabFood'
+  'GrabFood',
 ];
 
 export default function EarningsScreen() {
   const [platforms, setPlatforms] = useState<string[]>(defaultPlatforms);
   const [distanceUnit, setDistanceUnit] = useState<'mi' | 'km'>('mi');
+  const [currencySymbol, setCurrencySymbol] = useState('$');
 
   const [selectedPlatform, setSelectedPlatform] = useState('Uber');
   const [earnings, setEarnings] = useState('');
@@ -36,14 +38,16 @@ export default function EarningsScreen() {
   const [trips, setTrips] = useState('');
 
   const loadSettings = async () => {
-    const [customPlatforms, unit] = await Promise.all([
+    const [customPlatforms, unit, currencyCode] = await Promise.all([
       getCustomPlatforms(),
       getDistanceUnit(),
+      getCurrency(),
     ]);
 
     const mergedPlatforms = [...defaultPlatforms, ...customPlatforms];
     setPlatforms(mergedPlatforms);
     setDistanceUnit(unit);
+    setCurrencySymbol(getCurrencySymbol(currencyCode));
 
     if (!mergedPlatforms.includes(selectedPlatform)) {
       setSelectedPlatform(mergedPlatforms[0] || 'Uber');
@@ -112,7 +116,7 @@ export default function EarningsScreen() {
       <View style={styles.card}>
         <TextInput
           style={styles.input}
-          placeholder="Base Earnings ($)"
+          placeholder={`Base Earnings (${currencySymbol})`}
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={earnings}
@@ -120,7 +124,7 @@ export default function EarningsScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Tips ($)"
+          placeholder={`Tips (${currencySymbol})`}
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={tips}
@@ -128,7 +132,7 @@ export default function EarningsScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Bonus ($)"
+          placeholder={`Bonus (${currencySymbol})`}
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={bonus}

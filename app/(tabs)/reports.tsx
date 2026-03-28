@@ -11,6 +11,8 @@ import {
 import { BarChart } from 'react-native-chart-kit';
 import { getEarningsEntries, getExpenseEntries } from '../../utils/storage';
 import { exportDataToCSV } from '../../utils/exportCsv';
+import { getCurrency } from '../../utils/appSettings';
+import { getCurrencySymbol } from '../../utils/currency';
 
 type PlatformTotals = {
   platform: string;
@@ -37,6 +39,8 @@ type EarningsEntry = {
 const screenWidth = Dimensions.get('window').width;
 
 export default function ReportsScreen() {
+  const [currencySymbol, setCurrencySymbol] = useState('$');
+
   const [todayProfit, setTodayProfit] = useState(0);
   const [weekProfit, setWeekProfit] = useState(0);
   const [monthProfit, setMonthProfit] = useState(0);
@@ -59,9 +63,13 @@ export default function ReportsScreen() {
   const performanceScrollRef = useRef<ScrollView>(null);
 
   const loadReports = async () => {
-    const earningsEntries = (await getEarningsEntries()) as EarningsEntry[];
-    const expenseEntries = await getExpenseEntries();
+    const [earningsEntries, expenseEntries, currencyCode] = await Promise.all([
+      getEarningsEntries() as Promise<EarningsEntry[]>,
+      getExpenseEntries(),
+      getCurrency(),
+    ]);
 
+    setCurrencySymbol(getCurrencySymbol(currencyCode));
     setEarningsEntriesState(earningsEntries);
 
     const now = new Date();
@@ -356,7 +364,7 @@ export default function ReportsScreen() {
       <View style={styles.summaryGrid}>
         <View style={styles.fullWidthSummaryCard}>
           <Text style={styles.cardLabel}>Today’s Earnings</Text>
-          <Text style={styles.heroValue}>${todayEarnings.toFixed(2)}</Text>
+          <Text style={styles.heroValue}>{currencySymbol}{todayEarnings.toFixed(2)}</Text>
           <Text style={styles.subtleHelperText}>Total revenue before expenses</Text>
         </View>
 
@@ -368,13 +376,13 @@ export default function ReportsScreen() {
               { color: yearProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            ${yearProfit.toFixed(2)}
+            {currencySymbol}{yearProfit.toFixed(2)}
           </Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.cardLabel}>Today’s Expenses</Text>
-          <Text style={styles.cardValue}>${todayExpenses.toFixed(2)}</Text>
+          <Text style={styles.cardValue}>{currencySymbol}{todayExpenses.toFixed(2)}</Text>
         </View>
 
         <View style={styles.summaryCard}>
@@ -385,7 +393,7 @@ export default function ReportsScreen() {
               { color: todayProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            ${todayProfit.toFixed(2)}
+            {currencySymbol}{todayProfit.toFixed(2)}
           </Text>
         </View>
 
@@ -397,7 +405,7 @@ export default function ReportsScreen() {
               { color: weekProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            ${weekProfit.toFixed(2)}
+            {currencySymbol}{weekProfit.toFixed(2)}
           </Text>
         </View>
 
@@ -409,7 +417,7 @@ export default function ReportsScreen() {
               { color: monthProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            ${monthProfit.toFixed(2)}
+            {currencySymbol}{monthProfit.toFixed(2)}
           </Text>
         </View>
       </View>
@@ -428,7 +436,7 @@ export default function ReportsScreen() {
               { color: todayProfitPerHour >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            ${todayProfitPerHour.toFixed(2)}/hr
+            {currencySymbol}{todayProfitPerHour.toFixed(2)}/hr
           </Text>
         </View>
       </View>
@@ -466,7 +474,7 @@ export default function ReportsScreen() {
           <View style={styles.fixedYAxis}>
             {yAxisMarks.map((value, index) => (
               <Text key={index} style={styles.yAxisText}>
-                ${value.toFixed(0)}
+                {currencySymbol}{value.toFixed(0)}
               </Text>
             ))}
           </View>
@@ -480,7 +488,7 @@ export default function ReportsScreen() {
               data={performanceData}
               width={Math.max(screenWidth - 120, performanceData.labels.length * 55)}
               height={240}
-              yAxisLabel="$"
+              yAxisLabel={currencySymbol}
               fromZero
               withHorizontalLabels={false}
               chartConfig={chartConfig}
@@ -496,7 +504,7 @@ export default function ReportsScreen() {
           <View style={styles.bestPlatformBox}>
             <Text style={styles.bestPlatformName}>{bestPlatform.platform}</Text>
             <Text style={styles.bestPlatformAmount}>
-              ${bestPlatform.total.toFixed(2)}
+              {currencySymbol}{bestPlatform.total.toFixed(2)}
             </Text>
           </View>
         ) : (
@@ -514,7 +522,7 @@ export default function ReportsScreen() {
               data={platformChartData}
               width={Math.max(screenWidth - 60, topPlatforms.length * 90)}
               height={240}
-              yAxisLabel="$"
+              yAxisLabel={currencySymbol}
               fromZero
               chartConfig={chartConfig}
               style={styles.chart}
@@ -531,7 +539,7 @@ export default function ReportsScreen() {
           platformTotals.map((item) => (
             <View key={item.platform} style={styles.platformRow}>
               <Text style={styles.platformName}>{item.platform}</Text>
-              <Text style={styles.platformAmount}>${item.total.toFixed(2)}</Text>
+              <Text style={styles.platformAmount}>{currencySymbol}{item.total.toFixed(2)}</Text>
             </View>
           ))
         )}
@@ -545,7 +553,7 @@ export default function ReportsScreen() {
           expenseCategoryTotals.map((item) => (
             <View key={item.category} style={styles.platformRow}>
               <Text style={styles.platformName}>{item.category}</Text>
-              <Text style={styles.expenseAmount}>${item.total.toFixed(2)}</Text>
+              <Text style={styles.expenseAmount}>{currencySymbol}{item.total.toFixed(2)}</Text>
             </View>
           ))
         )}
@@ -703,7 +711,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   fixedYAxis: {
-    width: 48,
+    width: 56,
     height: 240,
     justifyContent: 'space-between',
     paddingBottom: 28,

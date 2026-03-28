@@ -2,6 +2,8 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { getEarningsEntries, getExpenseEntries } from '../../utils/storage';
+import { getCurrency } from '../../utils/appSettings';
+import { getCurrencySymbol } from '../../utils/currency';
 
 type HomeRange = 'today' | 'week' | 'month';
 
@@ -22,6 +24,7 @@ type ExpenseEntry = {
 
 export default function HomeScreen() {
   const [selectedRange, setSelectedRange] = useState<HomeRange>('today');
+  const [currencySymbol, setCurrencySymbol] = useState('$');
 
   const [earningsValue, setEarningsValue] = useState(0);
   const [expensesValue, setExpensesValue] = useState(0);
@@ -44,8 +47,13 @@ export default function HomeScreen() {
   };
 
   const loadData = async () => {
-    const earningsEntries = (await getEarningsEntries()) as EarningsEntry[];
-    const expenseEntries = (await getExpenseEntries()) as ExpenseEntry[];
+    const [earningsEntries, expenseEntries, currencyCode] = await Promise.all([
+      getEarningsEntries() as Promise<EarningsEntry[]>,
+      getExpenseEntries() as Promise<ExpenseEntry[]>,
+      getCurrency(),
+    ]);
+
+    setCurrencySymbol(getCurrencySymbol(currencyCode));
 
     const now = new Date();
 
@@ -61,14 +69,8 @@ export default function HomeScreen() {
     const isInSelectedRange = (dateString: string) => {
       const d = new Date(dateString);
 
-      if (selectedRange === 'today') {
-        return d >= startOfToday && d <= now;
-      }
-
-      if (selectedRange === 'week') {
-        return d >= startOfWeek && d <= now;
-      }
-
+      if (selectedRange === 'today') return d >= startOfToday && d <= now;
+      if (selectedRange === 'week') return d >= startOfWeek && d <= now;
       return d >= startOfMonth && d <= now;
     };
 
@@ -165,19 +167,19 @@ export default function HomeScreen() {
             { color: profitValue >= 0 ? '#4CAF50' : '#EF4444' },
           ]}
         >
-          ${profitValue.toFixed(2)}
+          {currencySymbol}{profitValue.toFixed(2)}
         </Text>
       </View>
 
       <View style={styles.grid}>
         <View style={styles.smallCard}>
           <Text style={styles.cardLabel}>{getRangeLabel()} Earnings</Text>
-          <Text style={styles.cardValue}>${earningsValue.toFixed(2)}</Text>
+          <Text style={styles.cardValue}>{currencySymbol}{earningsValue.toFixed(2)}</Text>
         </View>
 
         <View style={styles.smallCard}>
           <Text style={styles.cardLabel}>{getRangeLabel()} Expenses</Text>
-          <Text style={styles.cardValue}>${expensesValue.toFixed(2)}</Text>
+          <Text style={styles.cardValue}>{currencySymbol}{expensesValue.toFixed(2)}</Text>
         </View>
 
         <View style={styles.smallCard}>
@@ -193,7 +195,7 @@ export default function HomeScreen() {
               { color: profitPerHourValue >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            ${profitPerHourValue.toFixed(2)}/hr
+            {currencySymbol}{profitPerHourValue.toFixed(2)}/hr
           </Text>
         </View>
 
@@ -215,7 +217,7 @@ export default function HomeScreen() {
         <Text style={styles.cardValue}>{bestPlatform}</Text>
         {bestPlatform !== 'No data yet' && (
           <Text style={styles.bestPlatformAmount}>
-            ${bestPlatformAmount.toFixed(2)}
+            {currencySymbol}{bestPlatformAmount.toFixed(2)}
           </Text>
         )}
       </View>

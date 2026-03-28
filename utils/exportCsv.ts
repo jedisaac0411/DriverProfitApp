@@ -1,12 +1,23 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { getEarningsEntries, getExpenseEntries } from './storage';
+import { getCurrency } from './appSettings';
+import { getCurrencySymbol } from './currency';
 
 export async function exportDataToCSV() {
-  const earnings = await getEarningsEntries();
-  const expenses = await getExpenseEntries();
+  const [earnings, expenses, currencyCode] = await Promise.all([
+    getEarningsEntries(),
+    getExpenseEntries(),
+    getCurrency(),
+  ]);
+
+  const currencySymbol = getCurrencySymbol(currencyCode);
 
   let csv = '';
+
+  csv += 'SETTINGS\n';
+  csv += `Currency,${currencyCode}\n`;
+  csv += `Currency Symbol,${currencySymbol}\n\n`;
 
   csv += 'EARNINGS\n';
   csv += 'Date,Platform,Base Earnings,Tips,Bonus,Hours,Distance,Trips\n';
@@ -21,7 +32,7 @@ export async function exportDataToCSV() {
   csv += 'Date,Category,Amount,Note\n';
 
   expenses.forEach((e) => {
-    csv += `${new Date(e.date).toLocaleDateString()},${e.category},${e.amount},${e.note}\n`;
+    csv += `${new Date(e.date).toLocaleDateString()},${e.category},${e.amount},${e.note ?? ''}\n`;
   });
 
   const fileUri = FileSystem.documentDirectory + 'gig_profit_report.csv';

@@ -10,7 +10,8 @@ import {
   View,
 } from 'react-native';
 import { saveExpenseEntry } from '../../utils/storage';
-import { getCustomExpenseCategories } from '../../utils/appSettings';
+import { getCustomExpenseCategories, getCurrency } from '../../utils/appSettings';
+import { getCurrencySymbol } from '../../utils/currency';
 
 const defaultCategories = [
   'Gas',
@@ -25,14 +26,20 @@ const defaultCategories = [
 
 export default function ExpensesScreen() {
   const [categories, setCategories] = useState<string[]>(defaultCategories);
+  const [currencySymbol, setCurrencySymbol] = useState('$');
   const [selectedCategory, setSelectedCategory] = useState('Gas');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
 
   const loadCategories = async () => {
-    const customCategories = await getCustomExpenseCategories();
+    const [customCategories, currencyCode] = await Promise.all([
+      getCustomExpenseCategories(),
+      getCurrency(),
+    ]);
+
     const merged = [...defaultCategories, ...customCategories];
     setCategories(merged);
+    setCurrencySymbol(getCurrencySymbol(currencyCode));
 
     if (!merged.includes(selectedCategory)) {
       setSelectedCategory(merged[0] || 'Gas');
@@ -93,7 +100,7 @@ export default function ExpensesScreen() {
       <View style={styles.card}>
         <TextInput
           style={styles.input}
-          placeholder="Amount ($)"
+          placeholder={`Amount (${currencySymbol})`}
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={amount}
