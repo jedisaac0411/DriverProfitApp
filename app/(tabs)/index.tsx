@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { getEarningsEntries, getExpenseEntries } from '../../utils/storage';
 import { getCurrency } from '../../utils/appSettings';
 import { getCurrencySymbol } from '../../utils/currency';
-
+import { formatMoney, format } from '../../utils/format';
 type HomeRange = 'today' | 'week' | 'month';
 
 type EarningsEntry = {
@@ -134,7 +134,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Gig Profit Tracker</Text>
+      <Text style={styles.title}>GigProfit</Text>
       <Text style={styles.subtitle}>Overview of your current performance</Text>
 
       <View style={styles.filterRow}>
@@ -167,19 +167,19 @@ export default function HomeScreen() {
             { color: profitValue >= 0 ? '#4CAF50' : '#EF4444' },
           ]}
         >
-          {currencySymbol}{profitValue.toFixed(2)}
+          {formatMoney(currencySymbol, profitValue)}
         </Text>
       </View>
 
       <View style={styles.grid}>
         <View style={styles.smallCard}>
           <Text style={styles.cardLabel}>{getRangeLabel()} Earnings</Text>
-          <Text style={styles.cardValue}>{currencySymbol}{earningsValue.toFixed(2)}</Text>
+          <Text style={styles.cardValue}>{formatMoney(currencySymbol, earningsValue)}</Text>
         </View>
 
         <View style={styles.smallCard}>
           <Text style={styles.cardLabel}>{getRangeLabel()} Expenses</Text>
-          <Text style={styles.cardValue}>{currencySymbol}{expensesValue.toFixed(2)}</Text>
+          <Text style={styles.cardValue}>{formatMoney(currencySymbol, expensesValue)}</Text>
         </View>
 
         <View style={styles.smallCard}>
@@ -195,7 +195,7 @@ export default function HomeScreen() {
               { color: profitPerHourValue >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            {currencySymbol}{profitPerHourValue.toFixed(2)}/hr
+            {formatMoney(currencySymbol, profitPerHourValue)}/hr
           </Text>
         </View>
 
@@ -217,7 +217,7 @@ export default function HomeScreen() {
         <Text style={styles.cardValue}>{bestPlatform}</Text>
         {bestPlatform !== 'No data yet' && (
           <Text style={styles.bestPlatformAmount}>
-            {currencySymbol}{bestPlatformAmount.toFixed(2)}
+            {formatMoney(currencySymbol, bestPlatformAmount)}
           </Text>
         )}
       </View>

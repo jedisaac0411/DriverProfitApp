@@ -1,5 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { formatMoney, format } from '../../utils/format';
 import {
   Dimensions,
   ScrollView,
@@ -364,7 +365,7 @@ export default function ReportsScreen() {
       <View style={styles.summaryGrid}>
         <View style={styles.fullWidthSummaryCard}>
           <Text style={styles.cardLabel}>Today’s Earnings</Text>
-          <Text style={styles.heroValue}>{currencySymbol}{todayEarnings.toFixed(2)}</Text>
+          <Text style={styles.heroValue}>{formatMoney(currencySymbol, todayEarnings)}</Text>
           <Text style={styles.subtleHelperText}>Total revenue before expenses</Text>
         </View>
 
@@ -376,13 +377,13 @@ export default function ReportsScreen() {
               { color: yearProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            {currencySymbol}{yearProfit.toFixed(2)}
+            {formatMoney(currencySymbol, yearProfit)}
           </Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.cardLabel}>Today’s Expenses</Text>
-          <Text style={styles.cardValue}>{currencySymbol}{todayExpenses.toFixed(2)}</Text>
+          <Text style={styles.cardValue}>{formatMoney(currencySymbol, todayExpenses)}</Text>
         </View>
 
         <View style={styles.summaryCard}>
@@ -393,7 +394,7 @@ export default function ReportsScreen() {
               { color: todayProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            {currencySymbol}{todayProfit.toFixed(2)}
+            {formatMoney(currencySymbol, todayProfit)}
           </Text>
         </View>
 
@@ -405,7 +406,7 @@ export default function ReportsScreen() {
               { color: weekProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            {currencySymbol}{weekProfit.toFixed(2)}
+            {formatMoney(currencySymbol, weekProfit)}
           </Text>
         </View>
 
@@ -417,7 +418,7 @@ export default function ReportsScreen() {
               { color: monthProfit >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            {currencySymbol}{monthProfit.toFixed(2)}
+            {formatMoney(currencySymbol, monthProfit)}
           </Text>
         </View>
       </View>
@@ -436,7 +437,7 @@ export default function ReportsScreen() {
               { color: todayProfitPerHour >= 0 ? '#4CAF50' : '#EF4444' },
             ]}
           >
-            {currencySymbol}{todayProfitPerHour.toFixed(2)}/hr
+            {formatMoney(currencySymbol, todayProfitPerHour)}/hr
           </Text>
         </View>
       </View>
@@ -474,7 +475,7 @@ export default function ReportsScreen() {
           <View style={styles.fixedYAxis}>
             {yAxisMarks.map((value, index) => (
               <Text key={index} style={styles.yAxisText}>
-                {currencySymbol}{value.toFixed(0)}
+                {formatMoney(currencySymbol, value)}
               </Text>
             ))}
           </View>
@@ -504,7 +505,7 @@ export default function ReportsScreen() {
           <View style={styles.bestPlatformBox}>
             <Text style={styles.bestPlatformName}>{bestPlatform.platform}</Text>
             <Text style={styles.bestPlatformAmount}>
-              {currencySymbol}{bestPlatform.total.toFixed(2)}
+              {formatMoney(currencySymbol, bestPlatform.total)}
             </Text>
           </View>
         ) : (
@@ -539,7 +540,7 @@ export default function ReportsScreen() {
           platformTotals.map((item) => (
             <View key={item.platform} style={styles.platformRow}>
               <Text style={styles.platformName}>{item.platform}</Text>
-              <Text style={styles.platformAmount}>{currencySymbol}{item.total.toFixed(2)}</Text>
+              <Text style={styles.platformAmount}>{formatMoney(currencySymbol, item.total)}</Text>
             </View>
           ))
         )}
@@ -553,7 +554,7 @@ export default function ReportsScreen() {
           expenseCategoryTotals.map((item) => (
             <View key={item.category} style={styles.platformRow}>
               <Text style={styles.platformName}>{item.category}</Text>
-              <Text style={styles.expenseAmount}>{currencySymbol}{item.total.toFixed(2)}</Text>
+              <Text style={styles.expenseAmount}>{formatMoney(currencySymbol, item.total)}</Text>
             </View>
           ))
         )}

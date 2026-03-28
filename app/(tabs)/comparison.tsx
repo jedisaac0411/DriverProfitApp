@@ -1,5 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
+import { formatMoney, format } from '../../utils/format';
 import {
   ScrollView,
   StyleSheet,
@@ -168,18 +169,18 @@ export default function ComparisonScreen() {
             <View style={styles.row}>
               <Text style={styles.label}>Earnings</Text>
               <Text style={styles.value}>
-                {currencySymbol}{item.earnings.toFixed(2)}
+                {formatMoney(currencySymbol, item.earnings)}
               </Text>
             </View>
 
             <View style={styles.row}>
               <Text style={styles.label}>Hours</Text>
-              <Text style={styles.value}>{item.hours.toFixed(2)}</Text>
+              <Text style={styles.value}>{format(item.hours )}</Text>
             </View>
 
             <View style={styles.row}>
               <Text style={styles.label}>Trips</Text>
-              <Text style={styles.value}>{item.trips}</Text>
+              <Text style={styles.value}>{format(item.trips)}</Text>
             </View>
 
             <View style={styles.row}>
