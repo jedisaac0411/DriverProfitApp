@@ -7,39 +7,36 @@
     "icon": "./assets/icon.png",
     "scheme": "gigprofit",
     "userInterfaceStyle": "automatic",
-
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.DriverProfitApp"
+      "bundleIdentifier": "com.gigprofit.app"
     },
-
     "android": {
-      "package": "com.anonymous.DriverProfitApp",
+      "package": "com.gigprofit.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0B0F1A"
       }
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
     "plugins": [
       [
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
           "resizeMode": "contain",
+          "imageWidth": 320,
           "backgroundColor": "#0B0F1A"
         }
       ]
     ],
-
     "extra": {
       "eas": {
-        "projectId": "f8a1a4ad-b859-4aae-aa8f-c2f0a8b0bfaa"
+        "projectId": "861575d6-00f6-4362-b108-d48d06600b1e"
       }
-    }
+    },
+    "owner": "averagejoedeveloper"
   }
 }
