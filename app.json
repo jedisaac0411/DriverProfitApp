@@ -30,6 +30,12 @@
           "imageWidth": 320,
           "backgroundColor": "#0B0F1A"
         }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544/9214589741"
+        }
       ]
     ],
     "extra": {
