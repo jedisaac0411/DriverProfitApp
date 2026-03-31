@@ -1,8 +1,12 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import {View} from 'react-native';
+import BannerAd from '@/components/BannerAd';
 
 export default function TabLayout() {
   return (
+    <View style={{flex: 1}}>
+      <View style={{flex: 1}}>
     <Tabs
       screenOptions={{
         headerStyle: {
@@ -90,5 +94,8 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </View>
+    <BannerAd position="bottom" />
+  </View>
   );
 }

@@ -5,6 +5,9 @@ import { getEarningsEntries, getExpenseEntries } from '../../utils/storage';
 import { getCurrency } from '../../utils/appSettings';
 import { getCurrencySymbol } from '../../utils/currency';
 import { formatMoney, format } from '../../utils/format';
+import BannerAd from '@/components/BannerAd';
+import BannerAdComponent from '@/components/BannerAd';
+
 type HomeRange = 'today' | 'week' | 'month';
 
 type EarningsEntry = {
